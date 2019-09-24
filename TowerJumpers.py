@@ -28,9 +28,11 @@ class Game:
         self.player.level = 4
         self.player.vel = [2, 0]
         self.player.anchor.set(0.5, 0)
+        self.player.height = 32
         self.app.stage.addChild(self.player)
         self.app.stage.position.y = app.renderer.height / app.renderer.resolution
         self.app.stage.scale.y = -1
+        self.cameraTween = PIXI.tweenManager.createTween(self.app.stage)
 
         window.addEventListener('keydown', self.keyDown)
         #game setup
@@ -121,6 +123,14 @@ class Game:
         self.app.stage.addChild(gameArea)
         self.gameArea = gameArea
 
+    def moveCamera(self):
+        cameraPlayerOffset = 600
+        self.cameraTween.reset()
+        self.cameraTween.js_from({'y':self.app.stage.position.y}).to({'y':self.player.position.y + cameraPlayerOffset})
+        self.cameraTween.time = 800
+        # self.cameraTween.easing = PIXI.tween.Easing.inOutExpo()
+        self.cameraTween.start()
+
     def update(self, dt):
         if(self.player.vel[1] > 0):
             self.player.vel[1] -= dt * 1
@@ -135,8 +145,7 @@ class Game:
 
         if gridX < 0 or gridX > len(self.floors[gridY]):
             self.player.vel[1] -= 0.1            
-            gridY = gridY-1
-            self.player.level = gridY
+            gridY = gridY-1        
 
         c = self.floors[gridY][gridX]
         if c == Game.WALL:
@@ -150,10 +159,12 @@ class Game:
             if newY <  levelPosY and self.floors[gridY][gridX] == Game.FLOOR:
                 newY = levelPosY
                 self.player.vel[1] = 0
-                self.player.level = gridY
+                self.player.level = gridY                
 
+        self.moveCamera()
         self.player.position.x = newX
         self.player.position.y = newY
+ 
 
         PIXI.tweenManager.js_update()
 
