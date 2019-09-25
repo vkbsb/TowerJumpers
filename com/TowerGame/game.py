@@ -27,7 +27,7 @@ class Game:
 
         self.player = PIXI.Sprite(PIXI.Texture.WHITE)
         self.player.tint = 0xff0000
-        self.player.level = 4
+        self.player.level = GameMap.VISIBLE_FLOORS
         self.player.vel = [2, 0]
         self.player.anchor.set(0.5, 0)
         self.player.height = 32
@@ -46,15 +46,24 @@ class Game:
             print ("Left Pressed")
         elif evnt.key == "ArrowRight" or evnt.code == "ArrowRight":
             print("Right Pressed")
+            self.restartGame()
         elif evnt.key == " " or evnt.code == "Space":
             print("Jump")
-            self.player.vel[1] = 15
+            if self.player.vel[1] == 0:
+                self.player.vel[1] = 15
                       
+    def restartGame(self):
+        self.player.vel = [2, 0]
+        self.player.level = GameMap.VISIBLE_FLOORS
+        self.camera = Camera(self.app)
+        self.app.stage.removeChild(self.gameArea)
+        self.setup()
+        self.gameOver = False
 
     def setup(self):
         #game related stuff
         gameArea = PIXI.Container()
-        self.gameMap = GameMap(gameArea)
+        self.gameMap = GameMap(gameArea, self.player)
         self.app.stage.addChild(gameArea)
         self.gameArea = gameArea
 
@@ -82,12 +91,14 @@ class Game:
             self.player.vel[1] -= 0.1            
             gridY = gridY-1
             floorPlan = self.gameMap.getFloorPlan(gridY)
-            if not floorPlan:
-                self.gameOver = True
-                print("Game Over")
-                return
             #TODO: handle the case where gridX is negative. We have to end the game.  
 
+        if not floorPlan or self.player.level < self.gameMap.floorTail:
+            self.gameOver = True
+            print("Game Over")
+            self.restartGame()
+            return
+            
         c = floorPlan[gridX]
         if c == GameMap.WALL:
             self.player.vel[0] *= -1        
@@ -105,5 +116,6 @@ class Game:
         self.camera.centerOn(self.player)
         self.player.position.x = newX
         self.player.position.y = newY
+        self.gameMap.update(self.player)
  
         PIXI.tweenManager.js_update()

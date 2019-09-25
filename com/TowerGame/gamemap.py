@@ -7,11 +7,12 @@ import random
 from com.pixi import PIXI
 
 class GameMap:
-    BLOCK_SIZE = 10
+    BLOCK_SIZE = 15
     FLOOR_HEIGHT = 100
     FLOOR = '_'
     WALL = '|'
     GAP = ' '
+    VISIBLE_FLOORS = 4
     def __init__(self, gameArea):
         floors = [
             '|_____________________|',
@@ -21,18 +22,23 @@ class GameMap:
             '|__    _______________|',
             '      _____________________',
             '|_____________________|',
-            '      _________________',
+            '|__________      _________________',
             '|_________________________________|',
             '|______________________',
             '|_____________        ________',
             '|_____________________|',
         ]
+        floors.reverse()
         self.floors = floors
         blockSize = GameMap.BLOCK_SIZE
         floorHeight = GameMap.FLOOR_HEIGHT
         xOffset = 0
         yOffset = 0
         self.gameArea = gameArea
+        #[0] tracks the current level for the head and tail. [1] track the modulo floors. 
+        self.floorTail = [0, 0]
+        self.floorHead = [len(self.floors)-1, len(self.floors)-1]
+        self.floorSprites = []
         
         #usage for input callback.
         self.xOffset = xOffset
@@ -43,6 +49,7 @@ class GameMap:
             floor = self.createFloorSprite(floorplan)
             floor.position.y = yOffset + level * GameMap.FLOOR_HEIGHT
             gameArea.addChild(floor)
+            self.floorSprites.append(floor)
 
     def createFloorSprite(self, floorplan):
         floor = PIXI.Container()
@@ -75,6 +82,22 @@ class GameMap:
             floor.addChild(spr)
         return floor
 
-    def getFloorPlan(self, level):
-        if level >= 0 and level < len(self.floors):
-            return self.floors[level]
+    def getFloorPlan(self, level):        
+        if level >= 0:
+            off_level = level % len(self.floors)
+            return self.floors[off_level]
+
+    def update(self, player):
+        # print("floorTail: ", Math.max(0, player.level - GameMap.VISIBLE_FLOORS))
+        floorTail = Math.max(0, player.level - GameMap.VISIBLE_FLOORS)
+        if floorTail > self.floorTail[0]:
+            #wrap around the end tag and move the floor sprite.
+            delta = 1 #we are sure to get delta 1 everytime.             
+            self.floorHead[0] += delta
+            self.floorHead[1] = (self.floorHead[1] + delta ) % len(self.floors)
+            #update the floorplan that is pointed to by the floorHead[1] in floors 
+            #create new sprite for the floor and then set the position.
+            self.floorSprites[self.floorHead[1]].position.y = self.yOffset + GameMap.FLOOR_HEIGHT * self.floorHead[0]
+
+            self.floorTail[0] += delta
+            self.floorTail[1] = (self.floorTail[1] + delta) % len(self.floors)
