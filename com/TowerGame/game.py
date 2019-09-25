@@ -3,7 +3,6 @@ document = window = Math = Date = 0 # Prevent complaints by optional static chec
 PIXI = 0
 __pragma__ ('noskip')
 
-import random
 from com.pixi import PIXI
 from com.TowerGame.gamemap import GameMap
 from com.TowerGame.camera import Camera
@@ -22,7 +21,7 @@ class Game:
         app.renderer.resize(640, window.innerHeight)
         # app.renderer.resize(window.innerWidth, window.innerHeight)
         # app.renderer.backgroundColor = 0xffffff
-
+        self.gameOver = False
         self.app = app
         document.body.appendChild(app.view)
 
@@ -49,8 +48,6 @@ class Game:
             print("Right Pressed")
         elif evnt.key == " " or evnt.code == "Space":
             print("Jump")
-            # self.player.level += 1
-            # self.player.position.y = self.yOffset + self.player.level * self.floorHeight + self.wallThickness
             self.player.vel[1] = 15
                       
 
@@ -65,6 +62,9 @@ class Game:
         self.player.position.y = self.player.level * GameMap.FLOOR_HEIGHT + self.gameMap.wallThickness
 
     def update(self, dt):
+        if self.gameOver:
+            return
+
         if(self.player.vel[1] > 0):
             self.player.vel[1] -= dt * 1
         elif self.player.vel[1] < 0:
@@ -81,7 +81,11 @@ class Game:
         if gridX < 0 or gridX > len(floorPlan):
             self.player.vel[1] -= 0.1            
             gridY = gridY-1
-            floorPlan = self.gameMap.getFloorPlan(gridY)       
+            floorPlan = self.gameMap.getFloorPlan(gridY)
+            if not floorPlan:
+                self.gameOver = True
+                print("Game Over")
+                return
             #TODO: handle the case where gridX is negative. We have to end the game.  
 
         c = floorPlan[gridX]

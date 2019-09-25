@@ -3,7 +3,6 @@ document = window = Math = Date = 0 # Prevent complaints by optional static chec
 PIXI = 0
 __pragma__ ('noskip')
 
-import random
 from com.pixi import PIXI
 from com.TowerGame.gamemap import GameMap
 
