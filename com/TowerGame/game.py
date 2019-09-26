@@ -7,9 +7,46 @@ from com.pixi import PIXI
 from com.TowerGame.gamemap import GameMap
 from com.TowerGame.camera import Camera
 
+class Scene:
+    def __init__(self, rootStage):
+        self.stage = PIXI.Container()
+        rootStage.addChild(self.stage)
+
+    def setVisible(self, value):
+        self.stage.visible = value
+
+    def update(self, dt):
+        pass
+
+class GamePlay:
+    def __init__(self):
+        pass
+
+class LoadingScreen(Scene):
+    def __init__(self, rootStage):        
+        Scene.__init__(self, rootStage)
+        self.graphics = PIXI.Graphics()
+        # self.drawScene()
+        self.stage.addChild(self.graphics)
+
+    def drawScene(self):
+        # Set the fill color
+        self.graphics.beginFill(0xe74c3c); # Red
+        self.graphics.drawCircle(60, 185, 40) # drawCircle(x, y, radius)
+        self.graphics.endFill()
+        pass
+
+    def update(self, dt):
+        self.drawScene()
+
 class Game:
     TRAIL_IMAGE = "assets/images/Pixel25px.png"
     TRAIL_EMITTER = "assets/trail_effect.json"
+    LOADING_SCREEN = 0
+    TITLE_SCREEN = 1
+    GAMEPLAY_SCREEN = 2
+    GAMEOVER_SCREEN = 3
+
     def __init__(self):
         app = PIXI.Application({"width":640, "height":960, 'antialias': True})
 
@@ -26,6 +63,9 @@ class Game:
         self.gameOver = False
         self.app = app
         document.body.appendChild(app.view)
+        self.state = Game.LOADING_SCREEN
+        self.screen = LoadingScreen(self.app.stage)
+
 
         #reverse the GameMap stuff  
         for floorSet in GameMap.FLOOR_SETS:
@@ -41,9 +81,14 @@ class Game:
         self.player.vel = [4, 0]
         self.player.anchor.set(0.5, 0)
         self.player.height = 32
-        self.app.stage.addChild(self.player)
-        self.camera = Camera(app)
+        # self.app.stage.addChild(self.player)
+        self.gamePlayStage = PIXI.Container()
+        self.app.stage.addChild(self.gamePlayStage)
 
+        self.camera = Camera(app, self.gamePlayStage)
+        self.gamePlayStage.addChild(self.player)
+
+        self.gamePlayStage.visible = False
         window.addEventListener('keydown', self.keyDown)
         #game setup
         self.setup()
@@ -55,7 +100,7 @@ class Game:
         res = PIXI.loader.resources
         texture = res[Game.TRAIL_IMAGE].texture
         jsondata = res[Game.TRAIL_EMITTER].data
-        self.emitter = PIXI.particles.Emitter(self.app.stage, [texture], jsondata)
+        self.emitter = PIXI.particles.Emitter(self.gamePlayStage, [texture], jsondata)
         self.emitter.emit= True
         self.emStart = Date.now()
         #self.player.addChild()
@@ -75,22 +120,26 @@ class Game:
     def restartGame(self):
         self.player.vel = [4, 0]
         self.player.level = GameMap.VISIBLE_FLOORS
-        self.camera = Camera(self.app)
-        self.app.stage.removeChild(self.gameArea)
+        self.gamePlayStage.removeChild(self.gameArea)
+        self.camera = Camera(self.app, self.gamePlayStage)        
         self.setup()
         self.gameOver = False
+        print(self.app.stage.children.length)
+        print(self.app.stage.children[0].children.length)
 
     def setup(self):
         #game related stuff
         gameArea = PIXI.Container()
         self.gameMap = GameMap(gameArea, self.player)
-        self.app.stage.addChild(gameArea)
+        self.gamePlayStage.addChild(gameArea)
         self.gameArea = gameArea
 
         self.player.position.x = 2 * GameMap.BLOCK_SIZE
         self.player.position.y = self.player.level * GameMap.FLOOR_HEIGHT + self.gameMap.wallThickness
 
     def update(self, dt):
+        self.screen.update(dt)
+
         if self.gameOver:
             return
 

@@ -27,12 +27,23 @@ class GameMap:
             '|_____________|',
         ],
         [
-            '|____________       _____',
+            '|____________       _____|',
             '|          __________',
             '|_____________',
             '|___________      ',
             '|________________|',
-        ]
+        ],
+        [
+            '|________________|',
+            '________',
+            '        _____',
+            '             _____',
+            '                  _________________|',
+            '                  _____',
+            '            ______',
+            '      ______',
+            '|______________',
+        ],
     ]
     def __init__(self, gameArea):
         floors = [
@@ -103,17 +114,7 @@ class GameMap:
             spr = PIXI.TilingSprite(PIXI.Texture.WHITE, self.wallThickness, GameMap.FLOOR_HEIGHT)
             spr.position.x = xOffset + wall * GameMap.BLOCK_SIZE
             floor.addChild(spr)
-
-        # #left cap
-        # if floorplan[0] == GameMap.WALL:
-        #     spr = PIXI.TilingSprite(PIXI.Texture.WHITE, self.wallThickness, GameMap.FLOOR_HEIGHT)
-        #     spr.position.x = xOffset
-        #     floor.addChild(spr)
-        # #right cap
-        # if floorplan[floorLength-1] == GameMap.WALL:
-        #     spr = PIXI.TilingSprite(PIXI.Texture.WHITE, self.wallThickness, GameMap.FLOOR_HEIGHT)
-        #     spr.position.x = xOffset + (floorLength-1) * GameMap.BLOCK_SIZE
-        #     floor.addChild(spr)
+            
         return floor
 
     def getFloorPlan(self, level):        

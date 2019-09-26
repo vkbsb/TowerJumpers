@@ -7,8 +7,8 @@ from com.pixi import PIXI
 from com.TowerGame.gamemap import GameMap
 
 class Camera:
-    def __init__(self, app):
-        self.stage = app.stage
+    def __init__(self, app, gameplayLayer):        
+        self.stage = gameplayLayer        
         self.app = app
         self.stage.position.y = app.renderer.height / app.renderer.resolution        
         self.stage.scale.y = -1
