@@ -13,6 +13,27 @@ class GameMap:
     WALL = '|'
     GAP = ' '
     VISIBLE_FLOORS = 4
+    FLOOR_SETS = [
+        [
+            '          _____________|',
+            '______________',
+            '|_____________',
+            '          _____________|',
+        ],
+        [
+            '|_____________          |',
+            '|          _____________|',
+            '|_____________|',
+            '|_____________|',
+        ],
+        [
+            '|____________       _____',
+            '|          __________',
+            '|_____________',
+            '|___________      ',
+            '|________________|',
+        ]
+    ]
     def __init__(self, gameArea):
         floors = [
             '|_____________________|',
@@ -27,7 +48,7 @@ class GameMap:
             '|______________________',
             '|_____________        ________',
             '|_____________________|',
-        ]
+        ]        
         floors.reverse()
         self.floors = floors
         blockSize = GameMap.BLOCK_SIZE
@@ -45,6 +66,10 @@ class GameMap:
         self.yOffset = yOffset
         self.wallThickness = 5
 
+        #floor set
+        self.floorSet = 0
+        self.floorSetOffset = 0
+
         for level, floorplan in enumerate(floors):
             floor = self.createFloorSprite(floorplan)
             floor.position.y = yOffset + level * GameMap.FLOOR_HEIGHT
@@ -60,6 +85,7 @@ class GameMap:
             prevChar = GameMap.FLOOR
         
         floorLength = len(floorplan)
+        walls = []
         for x, block in enumerate(floorplan):
             if (block == GameMap.GAP or x == floorLength - 1) and prevChar == GameMap.FLOOR: #found first gap
                 l = x - prevX
@@ -70,20 +96,28 @@ class GameMap:
             elif block == GameMap.FLOOR and prevChar == GameMap.GAP: #found the next floor. 
                 prevX = x
                 prevChar = GameMap.FLOOR
-        #left cap
-        if floorplan[0] == GameMap.WALL:
+            if block == GameMap.WALL:
+                walls.append(x)
+
+        for wall in walls:
             spr = PIXI.TilingSprite(PIXI.Texture.WHITE, self.wallThickness, GameMap.FLOOR_HEIGHT)
-            spr.position.x = xOffset
+            spr.position.x = xOffset + wall * GameMap.BLOCK_SIZE
             floor.addChild(spr)
-        #right cap
-        if floorplan[floorLength-1] == GameMap.WALL:
-            spr = PIXI.TilingSprite(PIXI.Texture.WHITE, self.wallThickness, GameMap.FLOOR_HEIGHT)
-            spr.position.x = xOffset + (floorLength-1) * GameMap.BLOCK_SIZE
-            floor.addChild(spr)
+
+        # #left cap
+        # if floorplan[0] == GameMap.WALL:
+        #     spr = PIXI.TilingSprite(PIXI.Texture.WHITE, self.wallThickness, GameMap.FLOOR_HEIGHT)
+        #     spr.position.x = xOffset
+        #     floor.addChild(spr)
+        # #right cap
+        # if floorplan[floorLength-1] == GameMap.WALL:
+        #     spr = PIXI.TilingSprite(PIXI.Texture.WHITE, self.wallThickness, GameMap.FLOOR_HEIGHT)
+        #     spr.position.x = xOffset + (floorLength-1) * GameMap.BLOCK_SIZE
+        #     floor.addChild(spr)
         return floor
 
     def getFloorPlan(self, level):        
-        if level >= 0:
+        if level > self.floorTail[0]:
             off_level = level % len(self.floors)
             return self.floors[off_level]
 
@@ -95,9 +129,25 @@ class GameMap:
             delta = 1 #we are sure to get delta 1 everytime.             
             self.floorHead[0] += delta
             self.floorHead[1] = (self.floorHead[1] + delta ) % len(self.floors)
+
             #update the floorplan that is pointed to by the floorHead[1] in floors 
             #create new sprite for the floor and then set the position.
-            self.floorSprites[self.floorHead[1]].position.y = self.yOffset + GameMap.FLOOR_HEIGHT * self.floorHead[0]
+            floorSet =  GameMap.FLOOR_SETS[self.floorSet]           
+            floorplan = floorSet[self.floorSetOffset]
+            floorIndex = self.floorHead[1]
+            self.floorSprites[floorIndex]
+            self.gameArea.removeChild(self.floorSprites[floorIndex])
+            self.floors[floorIndex] = floorplan
+            #optimize by pre-creating?
+            floorSprite = self.createFloorSprite(floorplan)
+            self.gameArea.addChild(floorSprite)            
+            floorSprite.position.y = self.yOffset + GameMap.FLOOR_HEIGHT * self.floorHead[0]
+            #update the floorsetoffset to point to the next floorplan to pick.
+            self.floorSetOffset += 1
+            if self.floorSetOffset >= len(floorSet):
+                self.floorSet = random.choice(range(0, len(GameMap.FLOOR_SETS)))
+                self.floorSetOffset = 0
 
+            self.floorSprites[floorIndex] = floorSprite
             self.floorTail[0] += delta
             self.floorTail[1] = (self.floorTail[1] + delta) % len(self.floors)

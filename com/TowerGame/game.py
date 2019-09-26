@@ -8,6 +8,8 @@ from com.TowerGame.gamemap import GameMap
 from com.TowerGame.camera import Camera
 
 class Game:
+    TRAIL_IMAGE = "assets/images/Pixel25px.png"
+    TRAIL_EMITTER = "assets/trail_effect.json"
     def __init__(self):
         app = PIXI.Application({"width":640, "height":960, 'antialias': True})
 
@@ -25,10 +27,18 @@ class Game:
         self.app = app
         document.body.appendChild(app.view)
 
+        #reverse the GameMap stuff  
+        for floorSet in GameMap.FLOOR_SETS:
+            floorSet.reverse()
+
+        PIXI.loader.add([Game.TRAIL_EMITTER, Game.TRAIL_IMAGE])
+        PIXI.loader.load(self.onAssetsLoaded)
+        self.emitter = None
+
         self.player = PIXI.Sprite(PIXI.Texture.WHITE)
         self.player.tint = 0xff0000
         self.player.level = GameMap.VISIBLE_FLOORS
-        self.player.vel = [2, 0]
+        self.player.vel = [4, 0]
         self.player.anchor.set(0.5, 0)
         self.player.height = 32
         self.app.stage.addChild(self.player)
@@ -40,6 +50,16 @@ class Game:
 
         #schedule update for the game loop.    
         PIXI.Ticker.shared.add(self.update)
+
+    def onAssetsLoaded(self):
+        res = PIXI.loader.resources
+        texture = res[Game.TRAIL_IMAGE].texture
+        jsondata = res[Game.TRAIL_EMITTER].data
+        self.emitter = PIXI.particles.Emitter(self.app.stage, [texture], jsondata)
+        self.emitter.emit= True
+        self.emStart = Date.now()
+        #self.player.addChild()
+        pass
 
     def keyDown(self, evnt):
         if evnt.key == "ArrowLeft" or evnt.code == "ArrowLeft":
@@ -53,7 +73,7 @@ class Game:
                 self.player.vel[1] = 15
                       
     def restartGame(self):
-        self.player.vel = [2, 0]
+        self.player.vel = [4, 0]
         self.player.level = GameMap.VISIBLE_FLOORS
         self.camera = Camera(self.app)
         self.app.stage.removeChild(self.gameArea)
@@ -117,5 +137,12 @@ class Game:
         self.player.position.x = newX
         self.player.position.y = newY
         self.gameMap.update(self.player)
+
+        if self.emitter:
+            self.emitter.ownerPos.x = self.player.position.x
+            self.emitter.ownerPos.y = self.player.position.y
+            ts = Date.now()
+            self.emitter.js_update((ts-self.emStart) * 0.001)
+            self.emStart = ts
  
         PIXI.tweenManager.js_update()
