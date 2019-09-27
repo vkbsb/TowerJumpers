@@ -8,6 +8,7 @@ from com.TowerGame.gamemap import GameMap
 from com.TowerGame.camera import Camera
 from com.TowerGame.gameplay import GamePlayScreen
 from com.TowerGame.splash import LoadingScreen
+from com.TowerGame.gameover import GameOverScreen
 import com.TowerGame.assets as Assets
 
 class Game:
@@ -40,7 +41,7 @@ class Game:
         for floorSet in GameMap.FLOOR_SETS:
             floorSet.reverse()
 
-        PIXI.loader.add([Assets.TRAIL_EMITTER, Assets.TRAIL_IMAGE])
+        PIXI.loader.add([Assets.TRAIL_EMITTER, Assets.TRAIL_IMAGE, Assets.BITMAP_FONT])
         PIXI.loader.load(self.onAssetsLoaded)
 
         #game setup
@@ -65,6 +66,8 @@ class Game:
         if self.state == Game.GAMEPLAY_SCREEN:
             if self.screen.gameOver:
                 self.screen.cleanup()
-                print("StageChildren: ", self.app.stage.children.length)
-                self.screen = GamePlayScreen(self.app.stage)
+                self.screen = GameOverScreen(self.app.stage)
+                self.state = Game.GAMEOVER_SCREEN
+        if self.state == Game.GAMEOVER_SCREEN:
+            pass
         PIXI.tweenManager.js_update()

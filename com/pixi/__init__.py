@@ -36,6 +36,7 @@ PIXI.Graphics = _ctor(api.Graphics)
 PIXI.particles = api.particles
 PIXI.particles.Emitter = _ctor(api.particles.Emitter)
 PIXI.ParticleContainer = _ctor(api.ParticleContainer)
+PIXI.BitmapText = _ctor(api.BitmapText)
 
 PIXI.tweenManager = api.tweenManager
 PIXI.tween = api.tween

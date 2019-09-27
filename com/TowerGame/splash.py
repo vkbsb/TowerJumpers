@@ -14,13 +14,23 @@ class LoadingScreen(Scene):
         self.graphics = PIXI.Graphics()
         # self.drawScene()
         self.stage.addChild(self.graphics)
+        self.time = 0
 
-    def drawScene(self):
+    def drawScene(self, dt):
+        self.graphics.js_clear()
         # Set the fill color
         self.graphics.beginFill(0xe74c3c); # Red
-        self.graphics.drawCircle(60, 185, 40) # drawCircle(x, y, radius)
+        sx = 640/2.0
+        sy = window.innerHeight / 2.0
+        r = 20
+        offset = 50
+
+        self.graphics.drawCircle(sx - offset, sy, r * Math.abs(Math.sin(self.time*0.05))) # drawCircle(x, y, radius)
+        self.graphics.drawCircle(sx, sy, r * Math.abs(Math.sin(self.time*0.05 + Math.PI/6))) # drawCircle(x, y, radius)
+        self.graphics.drawCircle(sx + offset, sy, r * Math.abs(Math.sin(self.time*0.05 + Math.PI/3))) # drawCircle(x, y, radius)
         self.graphics.endFill()
+        self.time += dt
         pass
 
     def update(self, dt):
-        self.drawScene()
+        self.drawScene(dt)
