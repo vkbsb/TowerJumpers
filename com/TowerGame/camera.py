@@ -7,10 +7,9 @@ from com.pixi import PIXI
 from com.TowerGame.gamemap import GameMap
 
 class Camera:
-    def __init__(self, app, gameplayLayer):        
+    def __init__(self, gameplayLayer):        
         self.stage = gameplayLayer        
-        self.app = app
-        self.stage.position.y = app.renderer.height / app.renderer.resolution        
+        self.stage.position.y = window.innerHeight
         self.stage.scale.y = -1
         self.tween = PIXI.tweenManager.createTween(self.stage)
         self.cameraPlayerOffset = GameMap.FLOOR_HEIGHT * 5 #assuming we want the player to be 4th floor on start.
