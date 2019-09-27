@@ -8,6 +8,7 @@ from com.TowerGame.camera import Camera
 from com.TowerGame.scene import Scene
 from com.TowerGame.gamemap import GameMap
 import com.TowerGame.assets as Assets
+import random
 
 class GamePlayScreen(Scene):
     def __init__(self, rootStage):
@@ -21,6 +22,12 @@ class GamePlayScreen(Scene):
         self.initGame()
         self.gamePlayStage.addChild(self.player)
         window.addEventListener('keydown', self.keyDown)
+
+        self.blastColors = [
+            '#00ffee',
+            '#f235f2',
+            '#f2ff00'
+        ]
 
         res = PIXI.loader.resources
         texture = res[Assets.TRAIL_IMAGE].texture
@@ -101,6 +108,25 @@ class GamePlayScreen(Scene):
         self.player.position.x = newX
         self.player.position.y = newY
         self.gameMap.update(self.player)
+
+        #check if this is a milestone floor. 
+        if self.gameMap.isSpecial(self.player.level):
+            self.gameMap.makeNormal(self.player.level)
+            #add sfx on the floor. 
+            levelPosY = gridY * GameMap.FLOOR_HEIGHT + GameMap.FLOOR_HEIGHT/2
+            res = PIXI.loader.resources
+            texture = res[Assets.SPARK_IMAGE].texture
+            jsondata = res[Assets.BLAST_EMITTER].data
+            for i in range(0, 5):
+                jsondata.color.start = random.choice(self.blastColors)
+                emitter = PIXI.particles.Emitter(self.gamePlayStage, [texture], jsondata)
+                emitter.ownerPos.y = levelPosY
+                emitter.ownerPos.x = random.choice(range(0, 640))
+                emitter.emit= True
+                emitter.playOnceAndDestroy()
+                emitter.autoUpdate = True 
+            
+
 
         if self.emitter:
             self.emitter.ownerPos.x = self.player.position.x

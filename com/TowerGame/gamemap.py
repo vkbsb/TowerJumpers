@@ -87,7 +87,7 @@ class GameMap:
             gameArea.addChild(floor)
             self.floorSprites.append(floor)
 
-    def createFloorSprite(self, floorplan):
+    def createFloorSprite(self, floorplan, showFloorNumber=False):
         floor = PIXI.Container()
         prevX = 0
         xOffset = 0
@@ -106,6 +106,7 @@ class GameMap:
                 prevChar = GameMap.GAP
             elif block == GameMap.FLOOR and (prevChar == GameMap.GAP or prevChar == GameMap.WALL): #found the next floor. 
                 prevX = x
+                #solve the bug where the left wal was one block gap away from the rest of the floor. 
                 if prevChar == GameMap.WALL:
                     prevX -= 1
                 prevChar = GameMap.FLOOR
@@ -117,6 +118,16 @@ class GameMap:
             spr = PIXI.TilingSprite(PIXI.Texture.WHITE, self.wallThickness, GameMap.FLOOR_HEIGHT)
             spr.position.x = xOffset + wall * GameMap.BLOCK_SIZE
             floor.addChild(spr)
+
+        if len(walls) > 0 and showFloorNumber == True:
+            #if the floor is special add the floor number to left corner of the level. 
+            bitmapFontText = PIXI.BitmapText('{}'.format(self.floorHead[0]), { 'font': '64px Roboto', 'align': 'center' })
+            bitmapFontText.x = xOffset + walls[0] * GameMap.BLOCK_SIZE + self.wallThickness
+            bitmapFontText.y = GameMap.FLOOR_HEIGHT
+            bitmapFontText.scale.y = -0.5
+            bitmapFontText.scale.x = 0.5
+            # bitmapFontText.anchor.set(0.5, 0.5)
+            floor.addChild(bitmapFontText)
             
         return floor
 
@@ -124,6 +135,14 @@ class GameMap:
         if level > self.floorTail[0]:
             off_level = level % len(self.floors)
             return self.floors[off_level]
+
+    def isSpecial(self, level):
+        off_level = level % len(self.floors)
+        return self.floorSprites[off_level].name == "fx"
+    
+    def makeNormal(self, level):
+        off_level = level % len(self.floors)
+        self.floorSprites[off_level].name = "normal"
 
     def update(self, player):
         # print("floorTail: ", Math.max(0, player.level - GameMap.VISIBLE_FLOORS))
@@ -142,10 +161,15 @@ class GameMap:
             self.floorSprites[floorIndex]
             self.gameArea.removeChild(self.floorSprites[floorIndex])
             self.floors[floorIndex] = floorplan
+
             #optimize by pre-creating?
-            floorSprite = self.createFloorSprite(floorplan)
-            self.gameArea.addChild(floorSprite)            
-            floorSprite.position.y = self.yOffset + GameMap.FLOOR_HEIGHT * self.floorHead[0]
+            if self.floorHead[0] % 50 == 0:                
+                floorSprite = self.createFloorSprite(floorplan, True)
+                floorSprite.name = "fx"
+            else:
+                floorSprite = self.createFloorSprite(floorplan)
+            self.gameArea.addChild(floorSprite)
+            floorSprite.position.y = self.yOffset + GameMap.FLOOR_HEIGHT * self.floorHead[0]            
             #update the floorsetoffset to point to the next floorplan to pick.
             self.floorSetOffset += 1
             if self.floorSetOffset >= len(floorSet):
