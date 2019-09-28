@@ -25,7 +25,9 @@ class GameOverScreen(Scene):
     def setScore(self, score):
         if score > 0:
             self.scoreDisplay.text = str(score)
-            self.scoreDisplay.visible = True         
+            self.scoreDisplay.visible = True
+            if window.localStorage:
+                window.localStorage['highScore'] = score         
         
     def markSceneDone(self):
         self.finished = True
@@ -51,6 +53,10 @@ class GameOverScreen(Scene):
         self.scoreDisplay.anchor.set(0.5, 0.5)
         self.stage.addChild(self.scoreDisplay)
         self.scoreDisplay.visible = False
+        if window.localStorage and window.localStorage['highScore']:
+            self.scoreDisplay.visible = True
+            self.scoreDisplay.text = window.localStorage['highScore']
+
 
         btnText = PIXI.BitmapText('Play', FONT_CONFIG)
         btnText.scale.x = 0.5

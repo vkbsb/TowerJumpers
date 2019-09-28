@@ -61,8 +61,8 @@ class Game:
         #self.player.addChild()
         self.screen.cleanup()
         print("StageChildren: ", self.app.stage.children.length)
-        self.screen = GamePlayScreen(self.app.stage)
-        self.state = Game.GAMEPLAY_SCREEN
+        self.screen = GameOverScreen(self.app.stage)
+        self.state = Game.GAMEOVER_SCREEN
 
     def setup(self):
         #game related stuff

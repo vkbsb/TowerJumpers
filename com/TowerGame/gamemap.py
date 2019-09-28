@@ -179,7 +179,7 @@ class GameMap:
             else:
                 floorSprite = self.createFloorSprite(floorplan)
             self.gameArea.addChild(floorSprite)
-            floorSprite.position.y = self.yOffset + GameMap.FLOOR_HEIGHT * self.floorHead[0]            
+            floorSprite.position.y = self.yOffset + GameMap.FLOOR_HEIGHT * self.floorHead[0]
             #update the floorsetoffset to point to the next floorplan to pick.
             self.floorSetOffset += 1
             if self.floorSetOffset >= len(floorSet):
