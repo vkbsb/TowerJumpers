@@ -14,10 +14,11 @@ class GamePlayScreen(Scene):
     def __init__(self, rootStage):
         Scene.__init__(self, rootStage)
         self.emitter = None
+
         self.player = PIXI.Sprite(PIXI.Texture.WHITE)
-        self.player.tint = 0xff0000
-        self.player.anchor.set(0.5, 0)
-        self.player.height = 32
+        self.player.anchor.set(0.5, 0.5)
+        self.player.height = 20
+        self.player.width = 20
         self.gamePlayStage = self.stage #PIXI.Container()
         self.initGame()
         self.gamePlayStage.addChild(self.player)
@@ -29,13 +30,20 @@ class GamePlayScreen(Scene):
             '#f2ff00'
         ]
 
+        playerColors = [
+            0x00ffee,
+            0xf235f2,
+            0xf2ff00,
+        ]
+        self.player.tint = random.choice(playerColors)
+
         res = PIXI.loader.resources
         texture = res[Assets.TRAIL_IMAGE].texture
         jsondata = res[Assets.TRAIL_EMITTER].data
         self.emitter = PIXI.particles.Emitter(self.gamePlayStage, [texture], jsondata)
         self.emitter.emit= True
         self.emStart = Date.now()
-        
+
     def isComplete(self):
         return self.gameOver
 
@@ -49,12 +57,20 @@ class GamePlayScreen(Scene):
             print("Jump")
             if self.player.vel[1] == 0:
                 self.player.vel[1] = 15
+                tween = PIXI.tweenManager.createTween(self.player)
+                tween.expire = True
+                final_angle = 90 if self.player.vel[0] < 0 else -90
+                tween.js_from({'angle': 0}).to({'angle':final_angle})
+                tween.time = 300
+                tween.start()
+
 
     def initGame(self):
         self.player.level = GameMap.VISIBLE_FLOORS
         self.player.vel = [4, 0]
         self.camera = Camera(self.gamePlayStage)
         self.gameOver = False
+        self.score = 0
 
         gameArea = PIXI.Container()
         self.gameMap = GameMap(gameArea, self.player)
@@ -112,6 +128,8 @@ class GamePlayScreen(Scene):
         self.player.position.y = newY
         self.gameMap.update(self.player)
 
+        self.score = Math.max(self.score, self.player.level)
+
         #check if this is a milestone floor. 
         if self.gameMap.isSpecial(self.player.level):
             self.gameMap.makeNormal(self.player.level)
@@ -127,7 +145,9 @@ class GamePlayScreen(Scene):
                 emitter.ownerPos.x = random.choice(range(0, 640))
                 emitter.emit= True
                 emitter.playOnceAndDestroy()
-                emitter.autoUpdate = True 
+                emitter.autoUpdate = True
+                
+        self.gameMap.applyFloorEffect(self.player.level, self.player.tint) 
             
 
 

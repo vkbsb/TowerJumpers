@@ -73,8 +73,10 @@ class Game:
 
         if self.screen.isComplete():
             if self.state == Game.GAMEPLAY_SCREEN:
+                score = self.screen.score
                 self.screen.cleanup()
                 self.screen = GameOverScreen(self.app.stage)
+                self.screen.setScore(score)
                 self.state = Game.GAMEOVER_SCREEN                
             elif self.state == Game.GAMEOVER_SCREEN:
                 self.screen.cleanup()

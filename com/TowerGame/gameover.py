@@ -22,6 +22,11 @@ class GameOverScreen(Scene):
         self.tween.on('end', self.markSceneDone)
         self.tween.start()
 
+    def setScore(self, score):
+        if score > 0:
+            self.scoreDisplay.text = str(score)
+            self.scoreDisplay.visible = True         
+        
     def markSceneDone(self):
         self.finished = True
 
@@ -32,14 +37,22 @@ class GameOverScreen(Scene):
         sx = 640/2
         sy = window.innerHeight/2
         
-        bitmapFontText = PIXI.BitmapText('Game Over', FONT_CONFIG)
+        bitmapFontText = PIXI.BitmapText('Tower Jumpers', FONT_CONFIG)
         bitmapFontText.x = sx
         bitmapFontText.y = sy - 100
         bitmapFontText.anchor.set(0.5, 0.5)
         self.stage.addChild(bitmapFontText)
         self.txt = bitmapFontText
 
-        btnText = PIXI.BitmapText('Try Again', FONT_CONFIG)
+
+        self.scoreDisplay = PIXI.BitmapText("0", FONT_CONFIG)
+        self.scoreDisplay.x = sx
+        self.scoreDisplay.y = sy
+        self.scoreDisplay.anchor.set(0.5, 0.5)
+        self.stage.addChild(self.scoreDisplay)
+        self.scoreDisplay.visible = False
+
+        btnText = PIXI.BitmapText('Play', FONT_CONFIG)
         btnText.scale.x = 0.5
         btnText.scale.y = 0.5
         btnText.anchor.set(0.5, 0.5)

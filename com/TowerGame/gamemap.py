@@ -143,6 +143,16 @@ class GameMap:
     def makeNormal(self, level):
         off_level = level % len(self.floors)
         self.floorSprites[off_level].name = "normal"
+    
+    def applyFloorEffect(self, level, color):
+        off_level = level % len(self.floors)
+        floorSprite = self.floorSprites[off_level]
+        if floorSprite.accessibleTitle:
+            return 
+        for spr in floorSprite.children:
+            if spr.height <= self.wallThickness:
+                spr.tint = color
+        floorSprite.accessibleTitle = "cx"
 
     def update(self, player):
         # print("floorTail: ", Math.max(0, player.level - GameMap.VISIBLE_FLOORS))
