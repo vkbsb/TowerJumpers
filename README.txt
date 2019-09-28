@@ -24,5 +24,5 @@ if everything went right you should be able to play the game.
 
 
 HOW TO PLAY:
-press space to jump to the upper level of the tower. Since the character auto runs it
+press space key or press mouse button to jump to the upper level of the tower. Since the character auto runs it
 can change direction only when it hits a wall. Try to go as high as possible. 

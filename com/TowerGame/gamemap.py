@@ -5,6 +5,8 @@ __pragma__ ('noskip')
 
 import random
 from com.pixi import PIXI
+import com.howler
+from com.TowerGame.assets import PLAYER_COLORS
 
 class GameMap:
     BLOCK_SIZE = 15
@@ -15,51 +17,163 @@ class GameMap:
     VISIBLE_FLOORS = 4
     FLOOR_SETS = [
         [
-            '            _____________|',
-            '  ______________',
-            '  |_____________',
-            '            _____________|',
+            '|_____________|',
+            '|_____________|',
+            '          _____________|',
+            '______________',
+            '|_____________',
+            '          _____________|',
+            '|_____________',
+            '          _____________|',
+            '|_____________|',
+            '|_____________|',
         ],
         [
-            '  |_____________          |',
-            '  |          _____________|',
-            '  |_____________|',
-            '  |_____________|',
+            '       |_________|',
+            '|_________',
+            '        _________|',
+            '|_________',
+            '|       _________|',
+            '|___________',
+            '|___________      ',
+            '          _______|',
+            '          _______|',
+            '|________________|',
         ],
         [
-            '  |____________       _____|',
-            '  |          __________',
-            '  |_____________',
-            '  |___________      ',
-            '  |________________|',
+            '|________________|',
+            '     _____',
+            '|_________________________________|',
+            '   |________________|',
+            '|________     ________|',
+            '            __________|',
+            '  |__________',
+            '         |________________|',
+            '|_________________________________|',
+            '|_________________________________|',
+        ],
+         [            
+            '|_____________________|',
+            '      |_____________________|',
+            '|__    _______________|',
+            '|_____________________|',
+            '|_____________________|',
+            '|__________      _________________|',
+            '|_________________________________|',
+            '      |______________________',
+            '      |_____________        ________',
+            '      |_____________________|',
+        ],       
+        [
+            '|________________|',
+            '    _____',
+            '|________________|',
+            '            _____',
+            '|________________|',
+            '    _____',
+            '|_____________|',
+            '         |________________|',
+            '|_______________',
+            '|________|',
         ],
         [
-            '  |________________|',
-            '  ________',
-            '          _____',
+            '|________________|',
+            '    |____________',
+            '     ____________',
+            '     ____________',
+            '              __________|',
+            '              __________',
+            '              __________',
+            '      |__________',
+            '      ___________',
+            '|______________|',
+        ],
+       [
+            '|________________|',
+            '         ________',
+            '             _______',
+            '                    _______',
+            '                       ________|',
+            '                    _______',
+            '             _______',
+            '         ________',
+            '    ________',
+            '|______________|',
+        ],
+        [
+            '|________________|',
+            '    _____',
+            '      |__________|',
+            '            _____',
+            '              |__________|',
+            '                       _____',
+            '                 ______________|',
+            '              _____',
+            '           _____',
+            '|_______________|',
+        ],
+        [
+            '|________________|',
+            '      _____',
+            '  |_____',
+            '       _____|',
+            '    _____',
+            '|_____',
+            '    _____',
+            '       _____|',
+            '    _____',
+            '|______________|',
+        ],
+        [
+            '|_________________|',
+            '    |_____________',
+            '                  _____',
+            '                     __________|',
+            '                     _____',
+            '            |__________',
+            '                  _____',
+            '                     __________|',
+            '                     _____',
+            '|________________________|',
+        ],
+        [
+            '|_________________________________|',
+            '               _____|',
+            '           |_____',
+            '               _____|',
+            '           |_____',
+            '               _____|',
+            '           |_____',
+            '               _____|',
+            '           |_____',
+            '|_________________________________|',
+        ],
+        [
+            '|_________________________________|',
+            '___________________________________',
+            '_______________      ______________',
+            '|_____                      _____|',
+            '    _____                _____',
+            '       _____          _____',
+            '           |__________|',
+            '            __________',
             '               _____',
-            '                    _________________|',
-            '                    _____',
-            '              ______',
-            '        ______',
-            '  |______________',
+            '|_________________________________|',
         ],
     ]
     def __init__(self, gameArea):
-        floors = [
-            '   |_____________________|',
-            '   |_____________________|',
-            '         _____________________',
-            '  |_________________________________|',
-            '   |__    _______________|',
-            '         _____________________',
-            '   |_____________________|',
-            '   |__________      _________________',
-            '   |_________________________________|',
-            '          |______________________',
-            '          |_____________        ________',
-            '          |_____________________|',
-        ]        
+        floors = [            
+            '|_____________________|',
+            '      |_____________________|',
+            '|__    _______________|',
+            '|_____________________|',
+            '|_____________________|',
+            '|__________      _________________|',
+            '|_________________________________|',
+            '      |______________________',
+            '      |_____________        ________',
+            '      |_____________________|',
+        ]                
         floors.reverse()
         self.floors = floors
         blockSize = GameMap.BLOCK_SIZE
@@ -81,6 +195,12 @@ class GameMap:
         self.floorSet = 0
         self.floorSetOffset = 0
 
+        self.fullRandom = False
+        if window.localStorage['highscore']:
+            val = int(window.localStorage['highscore'])
+            if val > 50:
+                self.fullRandom = True
+        
         for level, floorplan in enumerate(floors):
             floor = self.createFloorSprite(floorplan)
             floor.position.y = yOffset + level * GameMap.FLOOR_HEIGHT
@@ -126,7 +246,20 @@ class GameMap:
             bitmapFontText.y = GameMap.FLOOR_HEIGHT
             bitmapFontText.scale.y = -0.5
             bitmapFontText.scale.x = 0.5
+            bitmapFontText.js_name = "txt"
             # bitmapFontText.anchor.set(0.5, 0.5)
+
+            #add the bar background
+            colors = []
+            bh = (GameMap.FLOOR_HEIGHT-self.wallThickness) / float(len(PLAYER_COLORS))
+            for indx, clr in enumerate(PLAYER_COLORS):
+                bg = PIXI.TilingSprite(PIXI.Texture.WHITE, (walls[1]-walls[0]) * GameMap.BLOCK_SIZE-self.wallThickness, bh)
+                bg.tint = clr
+                bg.position.y = indx * bh + self.wallThickness
+                bg.position.x = xOffset + walls[0] * GameMap.BLOCK_SIZE + self.wallThickness
+                bg.js_name = "bg"+str(indx)
+                bg.visible = False
+                floor.addChild(bg)
             floor.addChild(bitmapFontText)
             
         return floor
@@ -142,17 +275,39 @@ class GameMap:
     
     def makeNormal(self, level):
         off_level = level % len(self.floors)
-        self.floorSprites[off_level].name = "normal"
+        floorSprite = self.floorSprites[off_level]
+        if floorSprite.name.startsWith("fx"):
+            for indx in range(0, len(PLAYER_COLORS)):
+                spr = floorSprite.getChildByName("bg" + str(indx))
+                spr.visible = True 
+                tween = PIXI.tweenManager.createTween(spr)
+                tween.expire = True
+                # spr.alpha = 0.5
+                tween.delay = 200
+                if indx == 1:                
+                    tween.js_from({'width': 0, 'x':spr.position.x+spr.width}).to({'width':spr.width, 'x':spr.position.x})
+                else:
+                    tween.js_from({'width': 0}).to({'width':spr.width})
+                tween.time = 250
+                tween.start()
+                spr.width = 0
+                
+        floorSprite.name = "normal"
     
     def applyFloorEffect(self, level, color):
         off_level = level % len(self.floors)
         floorSprite = self.floorSprites[off_level]
         if floorSprite.accessibleTitle:
-            return 
+            return False
         for spr in floorSprite.children:
             if spr.height <= self.wallThickness:
                 spr.tint = color
         floorSprite.accessibleTitle = "cx"
+
+        txt = floorSprite.getChildByName("txt")
+        if txt:
+            txt.tint = 0x000000
+        return True
 
     def update(self, player):
         # print("floorTail: ", Math.max(0, player.level - GameMap.VISIBLE_FLOORS))
@@ -173,7 +328,7 @@ class GameMap:
             self.floors[floorIndex] = floorplan
 
             #optimize by pre-creating?
-            if self.floorHead[0] % 50 == 0:                
+            if self.floorHead[0] in (20, 40) or self.floorHead[0] % 50 == 0:                
                 floorSprite = self.createFloorSprite(floorplan, True)
                 floorSprite.name = "fx"
             else:
@@ -183,7 +338,10 @@ class GameMap:
             #update the floorsetoffset to point to the next floorplan to pick.
             self.floorSetOffset += 1
             if self.floorSetOffset >= len(floorSet):
-                self.floorSet = random.choice(range(0, len(GameMap.FLOOR_SETS)))
+                if self.floorHead[0] > 60 or self.fullRandom == True:
+                    self.floorSet = random.choice(range(0, len(GameMap.FLOOR_SETS)))
+                else:
+                    self.floorSet += 1                    
                 self.floorSetOffset = 0
 
             self.floorSprites[floorIndex] = floorSprite

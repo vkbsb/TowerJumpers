@@ -22,7 +22,11 @@ class GamePlayScreen(Scene):
         self.gamePlayStage = self.stage #PIXI.Container()
         self.initGame()
         self.gamePlayStage.addChild(self.player)
+        self.jumpSfx = __new__(Howl({"src":Assets.JUMP_SFX, "preload": True}))
+        self.swishSfx = __new__(Howl({"src":Assets.SWISH_SFX, "preload": True}))
+
         window.addEventListener('keydown', self.keyDown)
+        window.addEventListener('mousedown', self.mouseDown)
 
         self.blastColors = [
             '#00ffee',
@@ -30,12 +34,7 @@ class GamePlayScreen(Scene):
             '#f2ff00'
         ]
 
-        playerColors = [
-            0x00ffee,
-            0xf235f2,
-            0xf2ff00,
-        ]
-        self.player.tint = random.choice(playerColors)
+        self.player.tint = random.choice(Assets.PLAYER_COLORS)
 
         res = PIXI.loader.resources
         texture = res[Assets.TRAIL_IMAGE].texture
@@ -47,6 +46,21 @@ class GamePlayScreen(Scene):
     def isComplete(self):
         return self.gameOver
 
+    def playerJump(self):
+        if self.player.vel[1] == 0:
+            self.player.vel[1] = 15
+            tween = PIXI.tweenManager.createTween(self.player)
+            tween.expire = True
+            final_angle = 90 if self.player.vel[0] < 0 else -90
+            tween.js_from({'angle': 0}).to({'angle':final_angle})
+            tween.time = 300
+            tween.start()
+            self.jumpSfx.play()
+
+    def mouseDown(self, evnt):
+        print("Mouse pressed") 
+        self.playerJump()
+
     def keyDown(self, evnt):
         if evnt.key == "ArrowLeft" or evnt.code == "ArrowLeft":
             print ("Left Pressed")
@@ -55,14 +69,7 @@ class GamePlayScreen(Scene):
             self.restartGame()
         elif evnt.key == " " or evnt.code == "Space":
             print("Jump")
-            if self.player.vel[1] == 0:
-                self.player.vel[1] = 15
-                tween = PIXI.tweenManager.createTween(self.player)
-                tween.expire = True
-                final_angle = 90 if self.player.vel[0] < 0 else -90
-                tween.js_from({'angle': 0}).to({'angle':final_angle})
-                tween.time = 300
-                tween.start()
+            self.playerJump()
 
 
     def initGame(self):
@@ -133,6 +140,7 @@ class GamePlayScreen(Scene):
         #check if this is a milestone floor. 
         if self.gameMap.isSpecial(self.player.level):
             self.gameMap.makeNormal(self.player.level)
+            self.swishSfx.play()
             #add sfx on the floor. 
             levelPosY = gridY * GameMap.FLOOR_HEIGHT + GameMap.FLOOR_HEIGHT/2
             res = PIXI.loader.resources
@@ -142,15 +150,13 @@ class GamePlayScreen(Scene):
                 jsondata.color.start = random.choice(self.blastColors)
                 emitter = PIXI.particles.Emitter(self.gamePlayStage, [texture], jsondata)
                 emitter.ownerPos.y = levelPosY
-                emitter.ownerPos.x = random.choice(range(0, 640))
+                emitter.ownerPos.x = random.choice(range(GameMap.BLOCK_SIZE, 20*GameMap.BLOCK_SIZE))
                 emitter.emit= True
                 emitter.playOnceAndDestroy()
                 emitter.autoUpdate = True
-                
-        self.gameMap.applyFloorEffect(self.player.level, self.player.tint) 
+
+        self.gameMap.applyFloorEffect(self.player.level, self.player.tint)
             
-
-
         if self.emitter:
             self.emitter.ownerPos.x = self.player.position.x
             self.emitter.ownerPos.y = self.player.position.y

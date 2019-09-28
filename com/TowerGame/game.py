@@ -38,10 +38,10 @@ class Game:
 
 
         #reverse the GameMap stuff  
-        for floorSet in GameMap.FLOOR_SETS:
+        for setIndx, floorSet in enumerate(GameMap.FLOOR_SETS):
+            floorSet.reverse()
             for indx, floorplan in enumerate(floorSet):
                 floorSet[indx] = "    " + floorplan
-            floorSet.reverse()
 
         PIXI.loader.add([Assets.TRAIL_EMITTER, 
             Assets.TRAIL_IMAGE, 
