@@ -70,11 +70,15 @@ class Game:
 
     def update(self, dt):
         self.screen.update(dt)
-        if self.state == Game.GAMEPLAY_SCREEN:
-            if self.screen.gameOver:
+
+        if self.screen.isComplete():
+            if self.state == Game.GAMEPLAY_SCREEN:
                 self.screen.cleanup()
                 self.screen = GameOverScreen(self.app.stage)
-                self.state = Game.GAMEOVER_SCREEN
-        if self.state == Game.GAMEOVER_SCREEN:
-            pass
+                self.state = Game.GAMEOVER_SCREEN                
+            elif self.state == Game.GAMEOVER_SCREEN:
+                self.screen.cleanup()
+                self.screen = GamePlayScreen(self.app.stage)
+                self.state = Game.GAMEPLAY_SCREEN
+
         PIXI.tweenManager.js_update()

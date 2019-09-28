@@ -35,6 +35,9 @@ class GamePlayScreen(Scene):
         self.emitter = PIXI.particles.Emitter(self.gamePlayStage, [texture], jsondata)
         self.emitter.emit= True
         self.emStart = Date.now()
+        
+    def isComplete(self):
+        return self.gameOver
 
     def keyDown(self, evnt):
         if evnt.key == "ArrowLeft" or evnt.code == "ArrowLeft":

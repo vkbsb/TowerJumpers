@@ -19,3 +19,6 @@ class Scene:
     def cleanup(self):
         print("Deleting Scene")
         self.stage.parent.removeChild(self.stage)
+    
+    def isComplete(self):
+        return False
