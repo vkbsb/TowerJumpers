@@ -9,6 +9,7 @@ from com.TowerGame.assets import FONT_CONFIG
 from com.TowerGame.gameplay import GamePlayScreen
 
 class GameOverScreen(Scene):
+    SCORE_STORAGE_KEY = "highScore"
     def __init__(self, rootStage):
         Scene.__init__(self, rootStage)
         self.setupScene()
@@ -27,7 +28,12 @@ class GameOverScreen(Scene):
             self.scoreDisplay.text = str(score)
             self.scoreDisplay.visible = True
             if window.localStorage:
-                window.localStorage['highScore'] = score         
+                if window.localStorage[GameOverScreen.SCORE_STORAGE_KEY]:
+                    val = int(window.localStorage[GameOverScreen.SCORE_STORAGE_KEY])
+                    if val < score:
+                        window.localStorage[GameOverScreen.SCORE_STORAGE_KEY] = score
+                else:
+                    window.localStorage[GameOverScreen.SCORE_STORAGE_KEY] = score     
         
     def markSceneDone(self):
         self.finished = True
