@@ -12,7 +12,7 @@ class Camera:
         self.stage.position.y = window.innerHeight
         self.stage.scale.y = -1
         self.tween = PIXI.tweenManager.createTween(self.stage)
-        self.cameraPlayerOffset = GameMap.FLOOR_HEIGHT * 5 #assuming we want the player to be 4th floor on start.
+        self.cameraPlayerOffset = window.innerHeight/2.0#GameMap.FLOOR_HEIGHT * 5 #assuming we want the player to be 4th floor on start.
 
     def centerOn(self, player):
         self.tween.reset()
