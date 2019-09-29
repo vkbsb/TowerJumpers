@@ -27,6 +27,7 @@ class GamePlayScreen(Scene):
 
         window.addEventListener('keydown', self.keyDown)
         window.addEventListener('mousedown', self.mouseDown)
+        window.addEventListener('touchstart', self.mouseDown)
 
         self.blastColors = [
             '#00ffee',
@@ -168,3 +169,4 @@ class GamePlayScreen(Scene):
         Scene.cleanup(self)
         window.removeEventListener('keydown', self.keyDown)
         window.removeEventListener('mouseDown', self.mouseDown)
+        window.removeEventListener('touchstart', self.mouseDown)
