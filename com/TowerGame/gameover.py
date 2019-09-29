@@ -82,6 +82,7 @@ class GameOverScreen(Scene):
         self.stage.addChild(btn)
         self.stage.addChild(btnText)
         btn.on('click', self.replayClicked)
+        btn.on('tap', self.replayClicked)
 
         overlay = PIXI.TilingSprite(PIXI.Texture.WHITE, 640, window.innerHeight)
         overlay.tint = 0x00000

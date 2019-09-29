@@ -167,3 +167,4 @@ class GamePlayScreen(Scene):
     def cleanup(self):
         Scene.cleanup(self)
         window.removeEventListener('keydown', self.keyDown)
+        window.removeEventListener('mouseDown', self.mouseDown)
