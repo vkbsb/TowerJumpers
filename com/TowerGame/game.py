@@ -18,7 +18,12 @@ class Game:
     GAMEOVER_SCREEN = 3
 
     def __init__(self):
-        app = PIXI.Application({"width":640, "height":960, 'antialias': True})
+        app = PIXI.Application({
+            "width":640, 
+            "height":960, 
+            'antialias': True,
+            'resolution': window.innerWidth/640.0
+        })
 
         #set full screen rendering
         app.renderer.view.style.position = "absolute"
