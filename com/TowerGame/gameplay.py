@@ -4,6 +4,7 @@ PIXI = 0
 __pragma__ ('noskip')
 
 from com.pixi import PIXI
+from com.howler import PyHowl
 from com.TowerGame.camera import Camera
 from com.TowerGame.scene import Scene
 from com.TowerGame.gamemap import GameMap
@@ -22,8 +23,8 @@ class GamePlayScreen(Scene):
         self.gamePlayStage = self.stage #PIXI.Container()
         self.initGame()
         self.gamePlayStage.addChild(self.player)
-        self.jumpSfx = __new__(Howl({"src":Assets.JUMP_SFX, "preload": True}))
-        self.swishSfx = __new__(Howl({"src":Assets.SWISH_SFX, "preload": True}))
+        self.jumpSfx = PyHowl({"src":Assets.JUMP_SFX, "preload": True})
+        self.swishSfx = PyHowl({"src":Assets.SWISH_SFX, "preload": True})
 
         window.addEventListener('keydown', self.keyDown)
         window.addEventListener('mousedown', self.mouseDown)

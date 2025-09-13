@@ -14,9 +14,6 @@ def _ctor(obj):
 api = PIXI
 dragonBones = window.dragonBones
 
-#get rid of the global instances of PIXI and dragonBones.
-__pragma__('js', '{}', 'delete window.dragonBones; delete window.PIXI;')
-
 #PIXI object to be exposed for python to use. We are doing this to avoid writing __new__ in the python app code.
 PIXI = {}
 PIXI.Application = _ctor(api.Application)
